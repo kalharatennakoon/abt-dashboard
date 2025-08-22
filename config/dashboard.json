@@ -1,0 +1,171 @@
+{
+  "title": "ABT Analytics Dashboard",
+  "description": "Revenue Analytics & Business Intelligence",
+  "theme": "default",
+  "components": [
+    {
+      "id": "country-revenue",
+      "type": "table",
+      "title": "📊 Country Revenue Analysis",
+      "enabled": true,
+      "position": 1,
+      "size": "large",
+      "data_source": "/api/revenue/countries",
+      "refresh_rate": 300,
+      "options": {
+        "limit": 50,
+        "pagination": true,
+        "sorting": true,
+        "description": "Revenue breakdown by country and product"
+      }
+    },
+    {
+      "id": "top-products",
+      "type": "horizontal-bar-chart",
+      "title": "🏆 Top 20 Products",
+      "enabled": true,
+      "position": 2,
+      "size": "medium",
+      "data_source": "/api/products/top",
+      "refresh_rate": 300,
+      "options": {
+        "limit": 20,
+        "show_bars": true,
+        "gradient": true,
+        "description": "Most frequently purchased products"
+      }
+    },
+    {
+      "id": "monthly-sales",
+      "type": "vertical-bar-chart",
+      "title": "📈 Monthly Sales Trends",
+      "enabled": true,
+      "position": 3,
+      "size": "medium",
+      "data_source": "/api/sales/by-month",
+      "refresh_rate": 300,
+      "options": {
+        "highlight_peaks": true,
+        "show_summary": true,
+        "description": "Sales volume trends by month"
+      }
+    },
+    {
+      "id": "regions",
+      "type": "dual-bar-chart",
+      "title": "🌍 Top 30 Regions",
+      "enabled": true,
+      "position": 4,
+      "size": "large",
+      "data_source": "/api/regions/top",
+      "refresh_rate": 300,
+      "options": {
+        "limit": 30,
+        "dual_bars": true,
+        "scrollable": true,
+        "description": "Regional performance comparison"
+      }
+    }
+  ],
+  "api": {
+    "base_url": "http://localhost:8080",
+    "timeout": 8,
+    "cache_time": 300,
+    "compression": true,
+    "headers": {
+      "Accept": "application/json",
+      "User-Agent": "ABT-Dashboard/1.0"
+    }
+  },
+  "performance": {
+    "load_timeout": 10,
+    "parallel_loading": true,
+    "lazy_loading": false,
+    "show_indicators": true,
+    "cache_responses": true,
+    "compress_responses": true
+  },
+  "extensions": {
+    "plugins": [
+      {
+        "type": "chart",
+        "chart_type": "customer-satisfaction",
+        "container_id": "satisfaction-container",
+        "enabled": false,
+        "html_template": "<div class='satisfaction-chart'>Customer Satisfaction Chart</div>",
+        "css_template": ".satisfaction-chart { background: #f5f5f5; padding: 20px; }",
+        "js_template": "function renderSatisfactionChart(data) { /* Implementation */ }"
+      },
+      {
+        "type": "aggregator",
+        "aggregator_type": "seasonal-analysis",
+        "enabled": false,
+        "fields": ["year_month", "revenue", "units_sold"],
+        "group_by": "quarter",
+        "aggregate_by": "sum",
+        "metrics": ["revenue", "units_sold", "avg_order_value"]
+      },
+      {
+        "type": "insight",
+        "insight_type": "trend-analysis",
+        "enabled": false,
+        "priority": 2,
+        "rules": [
+          {
+            "condition": "revenue_growth > 10",
+            "message": "Strong revenue growth detected",
+            "severity": "high",
+            "threshold": 10
+          },
+          {
+            "condition": "revenue_decline > 5",
+            "message": "Revenue decline requires attention",
+            "severity": "medium",
+            "threshold": 5
+          }
+        ]
+      }
+    ],
+    "future_insights": {
+      "customer_lifetime_value": {
+        "type": "kpi",
+        "priority": "high",
+        "data_source": "/api/customers/ltv",
+        "calculation": "average_order_value * purchase_frequency * lifespan"
+      },
+      "inventory_optimization": {
+        "type": "table",
+        "priority": "medium",
+        "data_source": "/api/inventory/optimization",
+        "columns": ["product", "current_stock", "optimal_stock", "reorder_point"]
+      },
+      "market_penetration": {
+        "type": "heatmap",
+        "priority": "medium",
+        "data_source": "/api/market/penetration",
+        "dimensions": ["region", "product_category"]
+      }
+    }
+  },
+  "theme_customization": {
+    "primary_color": "#667eea",
+    "secondary_color": "#764ba2",
+    "accent_color": "#f093fb",
+    "success_color": "#4CAF50",
+    "warning_color": "#ff9800",
+    "error_color": "#f44336",
+    "font_family": "Inter, system-ui, sans-serif"
+  },
+  "accessibility": {
+    "high_contrast": false,
+    "reduced_motion": false,
+    "screen_reader_support": true,
+    "keyboard_navigation": true
+  },
+  "localization": {
+    "language": "en",
+    "currency": "USD",
+    "date_format": "MM/DD/YYYY",
+    "number_format": "en-US"
+  }
+}

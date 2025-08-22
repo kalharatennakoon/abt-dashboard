@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABT Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        #performanceIndicator {
+            transition: all 0.3s ease;
+        }
+        .performance-success {
+            color: #4CAF50 !important;
+        }
+        .performance-warning {
+            color: #ff9800 !important;
+        }
+        .performance-error {
+            color: #f44336 !important;
+        }
+        .content {
+            padding: 30px;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        th {
+            background: #f8f9fa;
+            color: #333;
+            font-weight: 600;
+            padding: 15px;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
+        }
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .currency {
+            text-align: right;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-weight: 500;
+        }
+        .number {
+            text-align: right;
+            font-weight: 500;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .chart-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 0.9em;
+        }
+        .chart-label {
+            min-width: 120px;
+            font-weight: 500;
+            color: #333;
+            margin-right: 10px;
+            font-size: 0.8em;
+        }
+        .chart-bars {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .frequency-bar {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 20px;
+            border-radius: 3px;
+            margin-right: 5px;
+            position: relative;
+            min-width: 2px;
+        }
+        .stock-bar {
+            background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+            height: 20px;
+            border-radius: 3px;
+            margin-left: 5px;
+            position: relative;
+            min-width: 2px;
+        }
+        .chart-values {
+            min-width: 100px;
+            text-align: right;
+            font-size: 0.8em;
+            color: #666;
+            margin-left: 10px;
+        }
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+        .legend-frequency {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+        .legend-stock {
+            background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+        }
+        .sales-chart-container {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .sales-chart {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            height: 300px;
+            margin: 20px 0;
+            padding: 20px 0;
+            border-bottom: 2px solid #e9ecef;
+            position: relative;
+        }
+        .sales-bar {
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px 4px 0 0;
+            min-width: 30px;
+            max-width: 60px;
+            flex: 1;
+            margin: 0 2px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+        }
+        .sales-bar:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .sales-bar-label {
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8em;
+            color: #666;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .sales-bar-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7em;
+            color: #333;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 6px;
+            border-radius: 3px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .sales-bar:hover .sales-bar-value {
+            opacity: 1;
+        }
+        .sales-chart-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .sales-chart-title {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .sales-chart-subtitle {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .sales-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .sales-summary-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        .sales-summary-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+        }
+        .sales-summary-label {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Regions Chart Styles */
+        .regions-chart-container {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .regions-chart {
+            max-height: 800px;
+            overflow-y: auto;
+        }
+        .region-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s ease;
+        }
+        .region-item:hover {
+            background-color: #f8f9fa;
+        }
+        .region-rank {
+            flex: 0 0 40px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+        }
+        .region-name {
+            flex: 1;
+            font-weight: 500;
+            color: #333;
+            padding: 0 15px;
+        }
+        .region-bars {
+            flex: 2;
+            position: relative;
+            height: 40px;
+            margin: 0 15px;
+        }
+        .region-revenue-bar, .region-items-bar {
+            position: absolute;
+            height: 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .region-revenue-bar {
+            top: 2px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+        }
+        .region-items-bar {
+            top: 22px;
+            background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 2px 4px rgba(240, 147, 251, 0.3);
+        }
+        .region-stats {
+            flex: 0 0 140px;
+            text-align: right;
+        }
+        .region-revenue {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.9em;
+        }
+        .region-items {
+            color: #f5576c;
+            font-size: 0.8em;
+            margin-top: 2px;
+        }
+        .regions-legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 8px;
+        }
+        .legend-revenue {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+        .legend-items {
+            background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+        }
+        .regions-chart-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .regions-chart-title {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .regions-chart-subtitle {
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ABT Dashboard</h1>
+            <p>Revenue Analytics & Business Intelligence</p>
+            <div id="performanceIndicator" style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">
+                <span id="loadingStatus">🔄 Loading dashboard...</span>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="section">
+                <h2>📊 Summary Statistics</h2>
+                <div class="stats" id="stats">
+                    <div class="stat-card">
+                        <span class="stat-number" id="totalCountries">-</span>
+                        <div class="stat-label">Countries</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="totalProducts">-</span>
+                        <div class="stat-label">Products</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="totalRevenue">-</span>
+                        <div class="stat-label">Total Revenue</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="totalTransactions">-</span>
+                        <div class="stat-label">Transactions</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌍 Country-Level Revenue Table</h2>
+                <p style="color: #666; margin-bottom: 15px; font-size: 0.9em;">
+                    <em>Showing top 50 records sorted by revenue (highest first)</em>
+                </p>
+                <div id="countryRevenueContainer">
+                    <div class="loading">Loading country revenue data...</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Top 20 Frequently Purchased Products</h2>
+                <p style="color: #666; margin-bottom: 15px; font-size: 0.9em;">
+                    <em>Products ranked by purchase frequency with current stock levels</em>
+                </p>
+                <div id="topProductsContainer">
+                    <div class="loading">Loading top products data...</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📈 Monthly Sales Volume Trends</h2>
+                <p style="color: #666; margin-bottom: 15px; font-size: 0.9em;">
+                    <em>Sales volume by month highlighting peak performance periods</em>
+                </p>
+                <div id="monthlySalesContainer">
+                    <div class="loading">Loading monthly sales data...</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌍 Top 30 Regions by Revenue</h2>
+                <p style="color: #666; margin-bottom: 15px; font-size: 0.9em;">
+                    <em>Regional performance showing total revenue and items sold</em>
+                </p>
+                <div id="regionsContainer">
+                    <div class="loading">Loading regions data...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Format currency in cents to dollars
+        function formatCurrency(cents) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(cents / 100);
+        }
+
+        // Format large numbers with commas
+        function formatNumber(num) {
+            return new Intl.NumberFormat('en-US').format(num);
+        }
+
+        // Fetch with timeout for performance monitoring
+        async function fetchWithTimeout(url, timeout = 8000) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            
+            try {
+                const response = await fetch(url, {
+                    signal: controller.signal,
+                    cache: 'default' // Use browser cache when available
+                });
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                return response;
+            } catch (error) {
+                clearTimeout(timeoutId);
+                if (error.name === 'AbortError') {
+                    throw new Error(`Request timeout after ${timeout}ms`);
+                }
+                throw error;
+            }
+        }
+
+        // Load and display country revenue data
+        async function loadCountryRevenue() {
+            try {
+                // Load first 50 records for the table
+                const response = await fetchWithTimeout('/api/revenue/countries?limit=50&offset=0');
+                const data = await response.json();
+                displayCountryRevenue(data);
+                
+                // Load all data for statistics (but limit to first 1000 for performance)
+                const statsResponse = await fetch('/api/revenue/countries?limit=1000&offset=0');
+                const statsData = await statsResponse.json();
+                updateStats(statsData);
+            } catch (error) {
+                document.getElementById('countryRevenueContainer').innerHTML = `
+                    <div class="error">
+                        <strong>Error loading data:</strong> ${error.message}
+                        <br><br>
+                        Make sure the server is running and data is available.
+                    </div>
+                `;
+            }
+        }
+
+        // Display country revenue table
+        function displayCountryRevenue(data) {
+            if (!data || data.length === 0) {
+                document.getElementById('countryRevenueContainer').innerHTML = `
+                    <div class="error">No revenue data available.</div>
+                `;
+                return;
+            }
+
+            const table = `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Country</th>
+                                <th>Product Name</th>
+                                <th>Total Revenue</th>
+                                <th>Number of Transactions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.map(row => `
+                                <tr>
+                                    <td>${row.country}</td>
+                                    <td>${row.product_name}</td>
+                                    <td class="currency">${formatCurrency(row.total_revenue_cents)}</td>
+                                    <td class="number">${formatNumber(row.number_of_transactions)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            document.getElementById('countryRevenueContainer').innerHTML = table;
+        }
+
+        // Update summary statistics
+        function updateStats(data) {
+            const countries = new Set(data.map(row => row.country));
+            const products = new Set(data.map(row => row.product_name));
+            const totalRevenue = data.reduce((sum, row) => sum + row.total_revenue_cents, 0);
+            const totalTransactions = data.reduce((sum, row) => sum + row.number_of_transactions, 0);
+
+            document.getElementById('totalCountries').textContent = countries.size;
+            document.getElementById('totalProducts').textContent = products.size;
+            document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
+            document.getElementById('totalTransactions').textContent = formatNumber(totalTransactions);
+        }
+
+        // Load and display top products data
+        async function loadTopProducts() {
+            try {
+                const response = await fetchWithTimeout('/api/products/top?limit=20');
+                const data = await response.json();
+                displayTopProductsChart(data);
+            } catch (error) {
+                document.getElementById('topProductsContainer').innerHTML = `
+                    <div class="error">
+                        <strong>Error loading top products:</strong> ${error.message}
+                        <br><br>
+                        Make sure the server is running and data is available.
+                    </div>
+                `;
+            }
+        }
+
+        // Display top products chart
+        function displayTopProductsChart(data) {
+            if (!data || data.length === 0) {
+                document.getElementById('topProductsContainer').innerHTML = `
+                    <div class="error">No products data available.</div>
+                `;
+                return;
+            }
+
+            // Find max values for scaling
+            const maxFrequency = Math.max(...data.map(item => item.tx_count));
+            const maxStock = Math.max(...data.map(item => item.stock_qty));
+
+            const chart = `
+                <div class="chart-container">
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color legend-frequency"></div>
+                            <span>Purchase Frequency (Transactions)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color legend-stock"></div>
+                            <span>Stock Quantity</span>
+                        </div>
+                    </div>
+                    ${data.map((item, index) => {
+                        const frequencyWidth = (item.tx_count / maxFrequency) * 100;
+                        const stockWidth = (item.stock_qty / maxStock) * 100;
+                        const productLabel = item.product_name.length > 15 
+                            ? item.product_name.substring(0, 15) + '...' 
+                            : item.product_name;
+                        
+                        return `
+                            <div class="chart-item">
+                                <div class="chart-label" title="${item.product_name}">
+                                    #${index + 1} ${productLabel}
+                                </div>
+                                <div class="chart-bars">
+                                    <div class="frequency-bar" style="width: ${frequencyWidth}%" 
+                                         title="Purchase Frequency: ${item.tx_count} transactions"></div>
+                                    <div class="stock-bar" style="width: ${stockWidth}%" 
+                                         title="Stock Quantity: ${formatNumber(item.stock_qty)} units"></div>
+                                </div>
+                                <div class="chart-values">
+                                    ${item.tx_count}tx | ${formatNumber(item.stock_qty)} stock
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                <div style="margin-top: 15px; color: #666; font-size: 0.8em; text-align: center;">
+                    <em>Hover over bars for detailed values. Products sorted by purchase frequency (highest first).</em>
+                </div>
+            `;
+            
+            document.getElementById('topProductsContainer').innerHTML = chart;
+        }
+
+        // Load and display monthly sales data
+        async function loadMonthlySales() {
+            try {
+                const response = await fetchWithTimeout('/api/sales/by-month');
+                const data = await response.json();
+                displayMonthlySalesChart(data);
+            } catch (error) {
+                document.getElementById('monthlySalesContainer').innerHTML = `
+                    <div class="error">
+                        <strong>Error loading monthly sales:</strong> ${error.message}
+                        <br><br>
+                        Make sure the server is running and data is available.
+                    </div>
+                `;
+            }
+        }
+
+        // Display monthly sales chart
+        function displayMonthlySalesChart(data) {
+            if (!data || data.length === 0) {
+                document.getElementById('monthlySalesContainer').innerHTML = `
+                    <div class="error">No monthly sales data available.</div>
+                `;
+                return;
+            }
+
+            // Sort data chronologically and calculate metrics
+            const sortedData = data.sort((a, b) => a.year_month.localeCompare(b.year_month));
+            const maxUnits = Math.max(...sortedData.map(item => item.units_sold));
+            const totalUnits = sortedData.reduce((sum, item) => sum + item.units_sold, 0);
+            const totalRevenue = sortedData.reduce((sum, item) => sum + item.revenue_cents, 0);
+            const totalTransactions = sortedData.reduce((sum, item) => sum + item.tx_count, 0);
+            const avgUnitsPerMonth = Math.round(totalUnits / sortedData.length);
+
+            // Find peak month
+            const peakMonth = sortedData.reduce((max, item) => 
+                item.units_sold > max.units_sold ? item : max
+            );
+
+            const chart = `
+                <div class="sales-chart-container">
+                    <div class="sales-chart-header">
+                        <div class="sales-chart-title">Monthly Sales Volume</div>
+                        <div class="sales-chart-subtitle">Units sold per month with peak performance highlights</div>
+                    </div>
+                    
+                    <div class="sales-chart">
+                        ${sortedData.map((item, index) => {
+                            const heightPercent = (item.units_sold / maxUnits) * 100;
+                            const monthLabel = new Date(item.year_month + '-01').toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                year: '2-digit' 
+                            });
+                            const isPeak = item.units_sold === peakMonth.units_sold;
+                            
+                            return `
+                                <div class="sales-bar ${isPeak ? 'peak-month' : ''}" 
+                                     style="height: ${Math.max(heightPercent, 2)}%; ${isPeak ? 'background: linear-gradient(180deg, #f093fb 0%, #f5576c 100%); box-shadow: 0 4px 8px rgba(240, 147, 251, 0.4);' : ''}"
+                                     title="Month: ${monthLabel}
+Units Sold: ${formatNumber(item.units_sold)}
+Transactions: ${formatNumber(item.tx_count)}
+Revenue: ${formatCurrency(item.revenue_cents)}">
+                                    <div class="sales-bar-value">
+                                        ${formatNumber(item.units_sold)} units
+                                    </div>
+                                    <div class="sales-bar-label">${monthLabel}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    <div class="sales-summary">
+                        <div class="sales-summary-item">
+                            <span class="sales-summary-value">${formatNumber(totalUnits)}</span>
+                            <div class="sales-summary-label">Total Units Sold</div>
+                        </div>
+                        <div class="sales-summary-item">
+                            <span class="sales-summary-value">${formatCurrency(totalRevenue)}</span>
+                            <div class="sales-summary-label">Total Revenue</div>
+                        </div>
+                        <div class="sales-summary-item">
+                            <span class="sales-summary-value">${formatNumber(avgUnitsPerMonth)}</span>
+                            <div class="sales-summary-label">Avg Units/Month</div>
+                        </div>
+                        <div class="sales-summary-item">
+                            <span class="sales-summary-value">${new Date(peakMonth.year_month + '-01').toLocaleDateString('en-US', { 
+                                month: 'long', 
+                                year: 'numeric' 
+                            })}</span>
+                            <div class="sales-summary-label">Peak Month</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 15px; color: #666; font-size: 0.8em; text-align: center;">
+                        <em>🏆 Peak months highlighted in pink. Hover over bars for detailed information.</em>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('monthlySalesContainer').innerHTML = chart;
+        }
+
+        // Load and display regions data
+        async function loadRegions() {
+            try {
+                const response = await fetchWithTimeout('/api/regions/top?limit=30');
+                const regions = await response.json();
+                displayRegionsChart(regions);
+            } catch (error) {
+                document.getElementById('regionsContainer').innerHTML = `
+                    <div class="error">
+                        <strong>Error loading regions:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Display regions chart
+        function displayRegionsChart(regions) {
+            if (!regions || regions.length === 0) {
+                document.getElementById('regionsContainer').innerHTML = `
+                    <div class="error">No regions data available.</div>
+                `;
+                return;
+            }
+
+            // Find max values for scaling
+            const maxRevenue = Math.max(...regions.map(r => r.total_revenue_cents));
+            const maxItems = Math.max(...regions.map(r => r.items_sold));
+
+            const chart = `
+                <div class="regions-chart-container">
+                    <div class="regions-chart-header">
+                        <div class="regions-chart-title">Top 30 Regions by Revenue</div>
+                        <div class="regions-chart-subtitle">Revenue and items sold comparison</div>
+                    </div>
+                    
+                    <div class="regions-legend">
+                        <div class="legend-item">
+                            <div class="legend-color legend-revenue"></div>
+                            <span>Total Revenue</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color legend-items"></div>
+                            <span>Items Sold</span>
+                        </div>
+                    </div>
+                    
+                    <div class="regions-chart">
+                        ${regions.map((region, index) => {
+                            const revenueWidth = (region.total_revenue_cents / maxRevenue) * 100;
+                            const itemsWidth = (region.items_sold / maxItems) * 100;
+                            
+                            return `
+                                <div class="region-item">
+                                    <div class="region-rank">${index + 1}</div>
+                                    <div class="region-name">${region.region}</div>
+                                    <div class="region-bars">
+                                        <div class="region-revenue-bar" style="width: ${revenueWidth}%" 
+                                             title="Revenue: ${formatCurrency(region.total_revenue_cents)}"></div>
+                                        <div class="region-items-bar" style="width: ${itemsWidth}%" 
+                                             title="Items Sold: ${formatNumber(region.items_sold)}"></div>
+                                    </div>
+                                    <div class="region-stats">
+                                        <div class="region-revenue">${formatCurrency(region.total_revenue_cents)}</div>
+                                        <div class="region-items">${formatNumber(region.items_sold)} items</div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    
+                    <div style="margin-top: 15px; color: #666; font-size: 0.8em; text-align: center;">
+                        <em>🎯 Dual bars show revenue (blue) and items sold (pink) with proportional scaling. Hover for exact values.</em>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('regionsContainer').innerHTML = chart;
+        }
+
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Start performance monitoring
+            const startTime = performance.now();
+            
+            // Update loading status
+            function updateLoadingStatus(message, className = '') {
+                const statusElement = document.getElementById('loadingStatus');
+                const indicator = document.getElementById('performanceIndicator');
+                if (statusElement) statusElement.textContent = message;
+                if (indicator && className) {
+                    indicator.className = className;
+                }
+            }
+            
+            updateLoadingStatus('🔄 Loading dashboard components...');
+            
+            // Load all data in parallel for better performance
+            Promise.allSettled([
+                loadCountryRevenue(),
+                loadTopProducts(),
+                loadMonthlySales(),
+                loadRegions()
+            ]).then((results) => {
+                const loadTime = performance.now() - startTime;
+                const loadTimeSeconds = (loadTime / 1000).toFixed(2);
+                
+                // Count successful vs failed loads
+                const successful = results.filter(r => r.status === 'fulfilled').length;
+                const failed = results.filter(r => r.status === 'rejected').length;
+                
+                console.log(`Dashboard loaded in ${loadTimeSeconds} seconds`);
+                console.log(`${successful}/${results.length} components loaded successfully`);
+                
+                // Update performance indicator based on results
+                if (failed > 0) {
+                    updateLoadingStatus(`⚠️ Loaded with ${failed} errors (${loadTimeSeconds}s)`, 'performance-warning');
+                    console.warn(`${failed} components failed to load`);
+                } else if (loadTime > 10000) {
+                    updateLoadingStatus(`⚠️ Loaded slowly (${loadTimeSeconds}s)`, 'performance-warning');
+                    console.warn(`⚠️ Dashboard loading time (${loadTimeSeconds}s) exceeds 10-second requirement`);
+                } else {
+                    updateLoadingStatus(`✅ Loaded successfully (${loadTimeSeconds}s)`, 'performance-success');
+                    console.log(`✅ Dashboard loading time meets 10-second requirement`);
+                }
+                
+                // Hide performance indicator after 3 seconds if successful
+                if (failed === 0 && loadTime <= 10000) {
+                    setTimeout(() => {
+                        const indicator = document.getElementById('performanceIndicator');
+                        if (indicator) {
+                            indicator.style.opacity = '0';
+                            setTimeout(() => {
+                                indicator.style.display = 'none';
+                            }, 300);
+                        }
+                    }, 3000);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

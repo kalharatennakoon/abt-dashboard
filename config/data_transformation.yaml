@@ -1,0 +1,249 @@
+# Data Transformation Configuration
+# This file configures the flexible data handling and transformation pipeline
+
+# Transformation Engine Settings
+transformation:
+  enable_validation: true
+  enable_optimization: true
+  
+  # Date format support - engine will try these formats in order
+  date_formats:
+    - "2006-01-02T15:04:05Z"     # RFC3339 / ISO 8601
+    - "2006-01-02"               # YYYY-MM-DD
+    - "2006-01-02 15:04:05"      # YYYY-MM-DD HH:MM:SS
+    - "01/02/2006"               # MM/DD/YYYY (US format)
+    - "02-01-2006"               # DD-MM-YYYY (European format)
+    - "2006/01/02"               # YYYY/MM/DD
+    - "Jan 2, 2006"              # Month DD, YYYY
+    - "2 Jan 2006"               # DD Month YYYY
+    - "2006-01-02T15:04:05-07:00" # RFC3339 with timezone
+  
+  # Currency format support
+  currency_formats:
+    - "USD"
+    - "EUR"
+    - "GBP"
+    - "JPY"
+    - "INR"
+    - "AUD"
+    - "CAD"
+  
+  # Values treated as null/empty
+  null_values:
+    - ""
+    - "NULL"
+    - "null"
+    - "N/A"
+    - "n/a"
+    - "NA"
+    - "na"
+    - "-"
+    - "None"
+    - "none"
+    - "undefined"
+    - "UNDEFINED"
+  
+  # Default values for missing data
+  defaults:
+    country: ""
+    region: ""
+    price_multiplier: 100.0  # Convert dollars to cents
+  
+  # Custom field mappings for data standardization
+  custom_mappings:
+    # Country mappings
+    "usa": "United States"
+    "us": "United States"
+    "america": "United States"
+    "uk": "United Kingdom"
+    "britain": "United Kingdom"
+    "england": "United Kingdom"
+    "uae": "United Arab Emirates"
+    "south korea": "South Korea"
+    "north korea": "North Korea"
+    "prc": "China"
+    "roc": "Taiwan"
+    
+    # Region mappings
+    "region_n": "North"
+    "region_s": "South"
+    "region_e": "East"
+    "region_w": "West"
+    "region_ne": "Northeast"
+    "region_nw": "Northwest"
+    "region_se": "Southeast"
+    "region_sw": "Southwest"
+    "region_central": "Central"
+    "region_centre": "Central"
+    
+    # Product mappings (examples)
+    "product_widget pro": "Widget Pro"
+    "product_gadget max": "Gadget Max"
+    "product_device ultra": "Device Ultra"
+  
+  # Data type specifications for validation
+  data_types:
+    transaction_id: "string"
+    country: "string"
+    region: "string"
+    product_name: "string"
+    price: "float"
+    quantity: "integer"
+    transaction_date: "datetime"
+
+# Validation Rules
+validation:
+  # Required fields that must be present
+  required_fields:
+    - "transaction_id"
+    - "country"
+    - "product_name"
+    - "price"
+    - "quantity"
+    - "transaction_date"
+  
+  # Field validation rules
+  field_rules:
+    transaction_id:
+      pattern: "^[a-zA-Z0-9_-]+$"
+      max_length: 100
+    
+    country:
+      pattern: "^[a-zA-Z\\s\\.\\-']+$"
+      max_length: 100
+    
+    region:
+      pattern: "^[a-zA-Z\\s\\.\\-']+$"
+      max_length: 100
+    
+    product_name:
+      max_length: 200
+    
+    price:
+      min_value: 0.01
+      max_value: 500000.00
+    
+    quantity:
+      min_value: 1
+      max_value: 100000
+    
+    transaction_date:
+      min_date: "2014-01-01"  # 10 years ago
+      max_date: "2026-12-31"  # 1 year in future
+
+# Data Quality Thresholds
+quality:
+  # Minimum acceptable data quality scores (0.0 to 1.0)
+  thresholds:
+    completeness: 0.95    # 95% of required fields must be present
+    validity: 0.90        # 90% of data must pass validation
+    uniqueness: 0.99      # 99% of transaction IDs must be unique
+    consistency: 0.95     # 95% consistency in formatting
+
+  # Actions to take when quality thresholds are not met
+  quality_actions:
+    warn_threshold: 0.85   # Warn if quality drops below 85%
+    reject_threshold: 0.70 # Reject data if quality drops below 70%
+
+# Optimization Settings
+optimization:
+  # Enable specific optimizations
+  enable_deduplication: true
+  enable_sorting: true
+  enable_indexing: true
+  
+  # Deduplication strategy
+  deduplication:
+    strategy: "composite"  # "id_only" or "composite"
+    composite_fields:
+      - "transaction_id"
+      - "country"
+      - "product_name"
+      - "price"
+      - "quantity"
+      - "transaction_date"
+  
+  # Sorting preferences for performance
+  sorting:
+    primary_sort: "transaction_date"
+    secondary_sort: "country"
+    order: "desc"  # "asc" or "desc"
+
+# Error Handling
+error_handling:
+  # How to handle various types of errors
+  strategies:
+    validation_error: "warn"     # "skip", "warn", "fail"
+    transformation_error: "warn" # "skip", "warn", "fail"
+    data_quality_error: "warn"   # "skip", "warn", "fail"
+  
+  # Maximum number of errors before stopping processing
+  max_errors: 1000
+  
+  # Whether to continue processing after errors
+  continue_on_error: true
+
+# Performance Settings
+performance:
+  # Batch processing settings
+  batch_size: 10000        # Process records in batches
+  parallel_processing: true # Enable parallel processing
+  max_workers: 4           # Number of worker goroutines
+  
+  # Memory management
+  memory_limit: "1GB"      # Maximum memory usage
+  gc_frequency: 1000       # Trigger GC every N records
+
+# Monitoring and Logging
+monitoring:
+  # Enable detailed logging
+  enable_detailed_logging: true
+  
+  # Log levels for different components
+  log_levels:
+    transformation: "info"
+    validation: "warn"
+    optimization: "info"
+    quality: "info"
+  
+  # Metrics to track
+  track_metrics:
+    - "processing_time"
+    - "records_processed"
+    - "errors_encountered"
+    - "quality_scores"
+    - "transformation_steps"
+
+# Export Settings
+export:
+  # Formats supported for exporting transformation reports
+  formats:
+    - "json"
+    - "csv"
+    - "yaml"
+  
+  # Include in export reports
+  include_in_reports:
+    - "transformation_summary"
+    - "quality_metrics"
+    - "error_details"
+    - "configuration_used"
+    - "processing_statistics"
+
+# Advanced Features
+advanced:
+  # Plugin system for custom transformations
+  plugins:
+    enable_custom_plugins: true
+    plugin_directory: "./plugins"
+  
+  # Machine learning features (future enhancement)
+  ml:
+    enable_ml_validation: false
+    model_path: "./models"
+  
+  # External data sources for enrichment
+  enrichment:
+    enable_external_lookup: false
+    country_codes_api: "https://api.example.com/countries"
+    product_catalog_api: "https://api.example.com/products"
